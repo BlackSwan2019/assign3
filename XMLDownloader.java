@@ -29,6 +29,9 @@ public class XMLDownloader extends JFrame {
         frame.createAndShowGUI();
     }
 
+    /*
+     * Create GUI elements.
+    */
     private void createAndShowGUI() {
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);    // Make execution stop upon clicking X.
         this.setSize(950, 600);
