@@ -1,5 +1,4 @@
-
-/************************************************************************
+/*
  CSCI 470 section 1
  TA:
  Partner 1      Ben Lane
@@ -28,8 +27,6 @@ public class XMLDownloader extends JFrame {
         XMLDownloader frame = new XMLDownloader("Apple Music List");
 
         frame.createAndShowGUI();
-
-        int num = 1;
     }
 
     private void createAndShowGUI() {
