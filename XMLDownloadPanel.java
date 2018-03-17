@@ -52,9 +52,6 @@ class XMLDownloadPanel extends JPanel {
         if (!type.equals("") && !limit.equals("") && !explicit.equals("")) {
             //Build URL string.
             name = "https://rss.itunes.apple.com/api/v1/us/itunes-music/" +  type + "/all/" + limit + "/" + explicit + ".atom";
-
-            System.out.println(name);
-            //albumList.setText(name);
         }
         else {
             albumList.setText("Missing menu selection(s).");
