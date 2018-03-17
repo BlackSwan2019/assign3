@@ -110,6 +110,7 @@ public class XMLDownloader extends JFrame {
         limitGroup.add(hundred);
         limit.add(hundred);
 
+        // Create Explicit menu and add to menu bar.
         JMenu explicit = new JMenu("Explicit");
         explicit.setToolTipText("Allow explicit albums");
         menuBar.add(explicit);
