@@ -16,6 +16,9 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
 
+/**
+ * This class produces & populates the GUI and handles actions.
+ */
 public class XMLDownloader extends JFrame {
     private XMLDownloadPanel panel = new XMLDownloadPanel();
 

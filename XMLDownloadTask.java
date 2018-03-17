@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import javax.xml.parsers.*;
 import org.xml.sax.*;
 
+/**
+ * This class downloads XML data and parses it.
+ */
 public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
     private String site;                                        // URL of RSS feed
 
