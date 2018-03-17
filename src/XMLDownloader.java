@@ -1,3 +1,17 @@
+
+/************************************************************************
+ CSCI 470 section 1
+ TA:
+ Partner 1     Ben Lane
+ zID:		   z1806979
+ Partner 2:    Jinhong Yao
+ zID:		   z178500
+ Assignment:   3
+ Date Due:	   2/14/2018
+
+ Purpose:
+ *************************************************************************/
+
 import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
