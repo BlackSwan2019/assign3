@@ -57,45 +57,54 @@ public class XMLDownloader extends JFrame {
 
         ButtonGroup typeGroup = new ButtonGroup();
 
+        // Create and add button for new music in the Type menu.
         JRadioButtonMenuItem newMusic = new JRadioButtonMenuItem("New Music");
         newMusic.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
         newMusic.addActionListener(new typeListener());
         typeGroup.add(newMusic);
         type.add(newMusic);
 
+        // Create and add button for recent releases in the Type menu.
         JRadioButtonMenuItem recentReleases = new JRadioButtonMenuItem("Recent Releases");
         recentReleases.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK));
         recentReleases.addActionListener(new typeListener());
         typeGroup.add(recentReleases);
         type.add(recentReleases);
 
+        // Create and add button for top albums in the Type menu.
         JRadioButtonMenuItem topAlbums = new JRadioButtonMenuItem("Top Albums");
         topAlbums.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_DOWN_MASK));
         topAlbums.addActionListener(new typeListener());
         typeGroup.add(topAlbums);
         type.add(topAlbums);
 
+        // Create Limit menu and add it to menu bar.
         JMenu limit = new JMenu("Limit");
         limit.setToolTipText("Number of results");
         menuBar.add(limit);
 
+        // Radio button group for Limit options.
         ButtonGroup limitGroup = new ButtonGroup();
 
+        // Create and add button for 10 in the Limit menu.
         JRadioButtonMenuItem ten = new JRadioButtonMenuItem("10");
         ten.addActionListener(new limitListener());
         limitGroup.add(ten);
         limit.add(ten);
 
+        // Create and add button for 25 in the Limit menu.
         JRadioButtonMenuItem twentyFive = new JRadioButtonMenuItem("25");
         twentyFive.addActionListener(new limitListener());
         limitGroup.add(twentyFive);
         limit.add(twentyFive);
 
+        // Create and add button for 50 in the Limit menu.
         JRadioButtonMenuItem fifty = new JRadioButtonMenuItem("50");
         fifty.addActionListener(new limitListener());
         limitGroup.add(fifty);
         limit.add(fifty);
 
+        // Create and add button for 100 in the Limit menu.
         JRadioButtonMenuItem hundred = new JRadioButtonMenuItem("100");
         hundred.addActionListener(new limitListener());
         limitGroup.add(hundred);
