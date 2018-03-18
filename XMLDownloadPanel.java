@@ -2,18 +2,29 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
 import javax.swing.SwingWorker.StateValue;
+import java.util.Timer;
+import java.util.TimerTask;
 
 class XMLDownloadPanel extends JPanel {
+    // task that will download and parse XML and display it in the JTextArea
     private XMLDownloadTask task;
 
+    // primary UI elements
     JTextArea albumList = new JTextArea();
     private JButton getAlbums = new JButton("Get Albums");
     private JPanel buttonPanel = new JPanel();
     private JScrollPane albumScroll;
 
+    // menu strings for URL building
     private String type = "";
     private String limit = "";
     private String explicit = "";
+
+    // timer variables and output field
+    private int minutes = 0;
+    private int ones = 0;
+    private int tens = 0;
+    private JLabel timeOutput = new JLabel();
 
     XMLDownloadPanel() {
         this.setLayout(new BorderLayout());
@@ -22,6 +33,10 @@ class XMLDownloadPanel extends JPanel {
         getAlbums.addActionListener(new albumButtonListener());
 
         buttonPanel.add(getAlbums, BorderLayout.CENTER);
+        getAlbums.setPreferredSize(getAlbums.getPreferredSize());
+        buttonPanel.add(new JLabel("Elapsed Time: "));
+        buttonPanel.add(timeOutput);
+        timeOutput.setText(Integer.toString(minutes) + ":" + Integer.toString(ones) + Integer.toString(tens));
 
         albumScroll = new JScrollPane(albumList);
 
@@ -59,15 +74,37 @@ class XMLDownloadPanel extends JPanel {
 
         task = new XMLDownloadTask(name, this);
 
+        Timer timer = new Timer();
+
         task.addPropertyChangeListener(event -> {
             switch ((StateValue) event.getNewValue()) {
                 case STARTED:
                     getAlbums.setText("Working...");
                     getAlbums.setEnabled(false);
+                    minutes = 0;
+                    ones = 0;
+                    tens = 0;
+                    timer.scheduleAtFixedRate(new TimerTask() {
+                        @Override
+                        public void run() {
+                            timeOutput.setText(Integer.toString(minutes) + ":" + Integer.toString(ones) + Integer.toString(tens));
+                            tens++;
+                            if (tens == 10) {
+                                ones++;
+                                tens = 0;
+                            }
+                            if (ones == 6) {
+                                minutes++;
+                                ones = 0;
+                            }
+                        }
+                    }, 0, 1000);
                     break;
                 case DONE:
                     getAlbums.setText("Get Albums");
                     getAlbums.setEnabled(true);
+                    timer.cancel();
+                    timer.purge();
                     break;
             }
         });
