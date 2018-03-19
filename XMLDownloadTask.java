@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.awt.*;
 import java.net.*;
 import java.net.URL;
 import java.io.*;
@@ -9,7 +10,9 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
 import javax.swing.table.*;
-import java.awt.Component;
+
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
 
 /**
  * This class downloads XML data and parses it.
@@ -63,6 +66,9 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
                 // Convert the StringBuilder object to a String
                 xmlDataString = xmlResponse.toString();
 
+                // Close the input stream
+                input.close();
+
                 // Create SAX parser.
                 SAXParserFactory factory = SAXParserFactory.newInstance();
                 SAXParser saxParser = factory.newSAXParser();
@@ -70,8 +76,11 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
                 // Parse the XML string.
                 saxParser.parse(new InputSource(new ByteArrayInputStream(xmlDataString.getBytes("utf-8"))), new AlbumHandler());
 
-                String[] columnNames = {"Name", "Artist", "Genre"};
-                Object[][] tableList = new String[albumList.size()][3];
+                String[] columnNames = {"Name", "Artist", "Genre", "Album Cover"};
+                Object[][] tableList = new Object[albumList.size()][4];
+
+                JTableHeader header = localPanel.albumTable.getTableHeader();
+                header.setDefaultRenderer(new HeaderRenderer(localPanel.albumTable));
 
                 int i = 0;
 
@@ -79,18 +88,23 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
                     tableList[i][0] = a.albumName;
                     tableList[i][1] = a.artistName;
                     tableList[i][2] = a.genre;
+                    tableList[i][3] = a.albumCover;
 
                     i++;
                 }
 
-                JTable tempTable = new JTable(tableList, columnNames);
+                System.out.println(site);
+/*
+                for (Album a : albumList) {
+                    System.out.println(a.artistName);
+                }
+*/
+
+                JTable tempTable = new JTable(new MyDefaultTableModel(tableList, columnNames));
 
                 localPanel.albumTable.setModel(tempTable.getModel());
 
-                JTableHeader header = localPanel.albumTable.getTableHeader();
-                header.setDefaultRenderer(new HeaderRenderer(localPanel.albumTable));
-
-                float[] columnWidthPercentage = {50.0f, 30.0f, 20.0f};
+                float[] columnWidthPercentage = {50.0f, 20.0f, 20.0f, 10.0f};
 
                 int tableWidth = localPanel.albumTable.getWidth();
 
@@ -100,16 +114,11 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
 
                 int numCols = jTableColumnModel.getColumnCount();
 
-                System.out.println(numCols);
-
                 for (i = 0; i < numCols; i++) {
                     column = jTableColumnModel.getColumn(i);
                     int pWidth = Math.round(columnWidthPercentage[i] * tableWidth);
                     column.setPreferredWidth(pWidth);
                 }
-
-                // Close the input stream
-                input.close();
             }
         }
         catch (Exception e) {
@@ -125,16 +134,34 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
         return albumList;
     }
 
+    private BufferedImage getScaledImage(Image sourceImage) {
+        BufferedImage resizedImage = new BufferedImage(50, 50, BufferedImage.TYPE_INT_ARGB);       // image container
+
+        Graphics2D g2 = resizedImage.createGraphics();
+
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
+        g2.drawImage(sourceImage, 0, 0, 50, 50, null);
+
+        g2.dispose();
+
+        return resizedImage;
+    }
+
     private class AlbumHandler extends DefaultHandler {
         private boolean bName = false;
         private boolean bArtist = false;
+        private boolean bImage = false;
 
         private String name;
         private String artist;
         private String genre;
-        private ImageIcon albumCover;
+        private String image;
 
-        int cat = 0;    // For making sure to only get the first "category" element for "genre".
+        ImageIcon albumCover;
+
+        int cat = 0;            // For making sure to only get the first "category" element for "genre".
+        int imageCount = 0;     // Keeps track of output images.
 
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) {
@@ -154,6 +181,11 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
 
                 cat++;
             }
+
+            if (qName.equalsIgnoreCase("im:image")) {
+                bImage = true;
+                image = "";
+            }
         }
 
         // This method may be called multiple times for a given element.
@@ -164,6 +196,9 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
 
             if (bArtist)
                 artist = artist + new String(ch, start, length);
+
+            if (bImage)
+                image = image + new String(ch, start, length);
         }
 
         @Override
@@ -174,9 +209,38 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
             if (qName.equalsIgnoreCase("im:artist"))
                 bArtist = false;
 
+            if (qName.equalsIgnoreCase("im:image"))
+                bImage = false;
+
             if (qName.equalsIgnoreCase("entry")) {
+                try {
+                    URL url = new URL(image);
+                    BufferedImage bufferedImage = ImageIO.read(url);
+
+                    // A file named OutputImage%d.png will be created in local directory.
+                    ImageIO.write(bufferedImage, "png", new FileOutputStream("OutputImage" + imageCount + ".png"));
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
+
+                String fileName = "OutputImage" + imageCount + ".png";
+
+                BufferedImage img = null;       // was type BufferedImage.
+
+                try {
+                    img = ImageIO.read(new File(fileName));
+                } catch (IOException e) {
+                    System.out.println("Can't read image files.");
+                }
+
+                imageCount++;
+
+                BufferedImage scaledImage = getScaledImage(img);
+
+                albumCover = new ImageIcon(scaledImage);
+
                 // Compile album name, artist, and genre into an Album object.
-                Album album = new Album(name, artist, genre);
+                Album album = new Album(name, artist, genre, albumCover);
 
                 // Add the object album to a list, publish it, etc.
                 albumList.add(album);
@@ -202,10 +266,14 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
     }
 
     class MyDefaultTableModel extends DefaultTableModel {
+        MyDefaultTableModel(Object[][] newArray, String[] newHeaders) {
+            setDataVector(newArray, newHeaders);
+        }
+
         @Override
         public Class<?> getColumnClass(int column) {
             switch(column) {
-                case 0:
+                case 0: return String.class;
                 case 1: return String.class;
                 case 2: return String.class;
                 case 3: return ImageIcon.class;

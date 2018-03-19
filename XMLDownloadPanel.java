@@ -5,6 +5,7 @@ import javax.swing.SwingWorker.StateValue;
 import javax.swing.table.*;
 import java.util.Timer;
 import java.util.TimerTask;
+import javax.swing.table.DefaultTableCellRenderer;
 
 class XMLDownloadPanel extends JPanel {
     // task that will download and parse XML and display it in the JTextArea
@@ -40,6 +41,7 @@ class XMLDownloadPanel extends JPanel {
 
         this.add(buttonPanel, BorderLayout.PAGE_START);
         getAlbums.addActionListener(new albumButtonListener());
+        //getAlbums.setBackground(new Color(255, 255, 255));
 
         buttonPanel.add(getAlbums, BorderLayout.CENTER);
         getAlbums.setPreferredSize(getAlbums.getPreferredSize());
@@ -50,8 +52,25 @@ class XMLDownloadPanel extends JPanel {
         // Set up JTable properties.
         albumTable.setShowGrid(false);
         albumTable.setFillsViewportHeight(true);
+        albumTable.getTableHeader().setFont(new Font("Helvetica Neue", Font.BOLD, 11));
         albumTable.setFont(new Font("Helvetica Neue", Font.BOLD, 12));
-        albumTable.setRowHeight(50);
+        albumTable.setRowHeight(55);
+        albumTable.setRowSelectionAllowed(false);
+        albumTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                final Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                Color blue = new Color(242, 242, 242);
+
+                c.setBackground(row % 2 == 0 ? blue : Color.WHITE);
+
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                setBorder(noFocusBorder);
+
+                return c;
+            }
+        });
 
         albumScroll = new JScrollPane(albumTable);
 
@@ -64,7 +83,9 @@ class XMLDownloadPanel extends JPanel {
         type = newType;
     }
 
-    void setLimit(String newLimit) { limit = newLimit; }
+    void setLimit(String newLimit) {
+        limit = newLimit;
+    }
 
     void setExplicit(String newExplicit) {
         explicit = newExplicit;
@@ -72,6 +93,7 @@ class XMLDownloadPanel extends JPanel {
 
     class albumButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent event) {
+            // Reset table to blank.
             albumTable.setModel(new DefaultTableModel());
 
             download();
@@ -83,9 +105,8 @@ class XMLDownloadPanel extends JPanel {
 
         if (!type.equals("") && !limit.equals("") && !explicit.equals("")) {
             // Build URL string.
-            name = "https://rss.itunes.apple.com/api/v1/us/itunes-music/" +  type + "/all/" + limit + "/" + explicit + ".atom";
-        }
-        else {
+            name = "https://rss.itunes.apple.com/api/v1/us/itunes-music/" + type + "/all/" + limit + "/" + explicit + ".atom";
+        } else {
             albumList.setText("Missing menu selection(s).");
         }
 
