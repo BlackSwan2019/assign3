@@ -56,6 +56,9 @@ class XMLDownloadPanel extends JPanel {
         albumTable.setFont(new Font("Helvetica Neue", Font.BOLD, 12));
         albumTable.setRowHeight(55);
         albumTable.setRowSelectionAllowed(false);
+
+        albumTable.getTableHeader().setDefaultRenderer(new HeaderRenderer(albumTable));
+
         albumTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -148,5 +151,19 @@ class XMLDownloadPanel extends JPanel {
         });
 
         task.execute();
+    }
+
+    private static class HeaderRenderer implements TableCellRenderer {
+        DefaultTableCellRenderer renderer;
+
+        HeaderRenderer(JTable table) {
+            renderer = (DefaultTableCellRenderer) table.getTableHeader().getDefaultRenderer();
+            renderer.setHorizontalAlignment(JLabel.LEFT);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+            return renderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+        }
     }
 }

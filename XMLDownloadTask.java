@@ -79,9 +79,6 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
                 String[] columnNames = {"Name", "Artist", "Genre", "Album Cover"};
                 Object[][] tableList = new Object[albumList.size()][4];
 
-                JTableHeader header = localPanel.albumTable.getTableHeader();
-                header.setDefaultRenderer(new HeaderRenderer(localPanel.albumTable));
-
                 int i = 0;
 
                 for (Album a : albumList) {
@@ -92,13 +89,6 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
 
                     i++;
                 }
-
-                System.out.println(site);
-/*
-                for (Album a : albumList) {
-                    System.out.println(a.artistName);
-                }
-*/
 
                 JTable tempTable = new JTable(new MyDefaultTableModel(tableList, columnNames));
 
@@ -250,7 +240,7 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
             }
         }
     }
-
+/*
     private static class HeaderRenderer implements TableCellRenderer {
         DefaultTableCellRenderer renderer;
 
@@ -264,7 +254,7 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
             return renderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
         }
     }
-
+*/
     class MyDefaultTableModel extends DefaultTableModel {
         MyDefaultTableModel(Object[][] newArray, String[] newHeaders) {
             setDataVector(newArray, newHeaders);
