@@ -2,6 +2,7 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
 import javax.swing.SwingWorker.StateValue;
+import javax.swing.table.*;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -14,6 +15,14 @@ class XMLDownloadPanel extends JPanel {
     private JButton getAlbums = new JButton("Get Albums");
     private JPanel buttonPanel = new JPanel();
     private JScrollPane albumScroll;
+
+    JTable albumTable = new JTable() {
+        private static final long serialVersionUID = 1L;
+
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
 
     // menu strings for URL building
     private String type = "";
@@ -38,7 +47,15 @@ class XMLDownloadPanel extends JPanel {
         buttonPanel.add(timeOutput);
         timeOutput.setText(Integer.toString(minutes) + ":" + Integer.toString(ones) + Integer.toString(tens));
 
-        albumScroll = new JScrollPane(albumList);
+        // Set up JTable properties.
+        albumTable.setShowGrid(false);
+        albumTable.setFillsViewportHeight(true);
+        albumTable.setFont(new Font("Helvetica Neue", Font.BOLD, 12));
+        albumTable.setRowHeight(50);
+
+        albumScroll = new JScrollPane(albumTable);
+
+        //albumScroll = new JScrollPane(albumList);
 
         this.add(albumScroll, BorderLayout.CENTER);
     }
@@ -55,7 +72,7 @@ class XMLDownloadPanel extends JPanel {
 
     class albumButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent event) {
-            albumList.setText("");
+            albumTable.setModel(new DefaultTableModel());
 
             download();
         }
@@ -65,7 +82,7 @@ class XMLDownloadPanel extends JPanel {
         String name = "";
 
         if (!type.equals("") && !limit.equals("") && !explicit.equals("")) {
-            //Build URL string.
+            // Build URL string.
             name = "https://rss.itunes.apple.com/api/v1/us/itunes-music/" +  type + "/all/" + limit + "/" + explicit + ".atom";
         }
         else {

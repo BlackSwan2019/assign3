@@ -1,5 +1,3 @@
-import org.xml.sax.helpers.DefaultHandler;
-
 import javax.swing.*;
 import java.net.*;
 import java.net.URL;
@@ -8,6 +6,10 @@ import java.util.ArrayList;
 
 import javax.xml.parsers.*;
 import org.xml.sax.*;
+import org.xml.sax.helpers.DefaultHandler;
+
+import javax.swing.table.*;
+import java.awt.Component;
 
 /**
  * This class downloads XML data and parses it.
@@ -21,8 +23,6 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
 
     XMLDownloadTask(String newSite, XMLDownloadPanel panel) {
         site = newSite;
-
-        localPanel = new XMLDownloadPanel();
 
         localPanel = panel;
     }
@@ -70,8 +70,42 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
                 // Parse the XML string.
                 saxParser.parse(new InputSource(new ByteArrayInputStream(xmlDataString.getBytes("utf-8"))), new AlbumHandler());
 
+                String[] columnNames = {"Name", "Artist", "Genre"};
+                Object[][] tableList = new String[albumList.size()][3];
+
+                int i = 0;
+
                 for (Album a : albumList) {
-                    localPanel.albumList.append(a.albumName + ";  " + a.artistName + ";  " + a.genre + "\n");
+                    tableList[i][0] = a.albumName;
+                    tableList[i][1] = a.artistName;
+                    tableList[i][2] = a.genre;
+
+                    i++;
+                }
+
+                JTable tempTable = new JTable(tableList, columnNames);
+
+                localPanel.albumTable.setModel(tempTable.getModel());
+
+                JTableHeader header = localPanel.albumTable.getTableHeader();
+                header.setDefaultRenderer(new HeaderRenderer(localPanel.albumTable));
+
+                float[] columnWidthPercentage = {50.0f, 30.0f, 20.0f};
+
+                int tableWidth = localPanel.albumTable.getWidth();
+
+                TableColumn column;
+
+                TableColumnModel jTableColumnModel = localPanel.albumTable.getColumnModel();
+
+                int numCols = jTableColumnModel.getColumnCount();
+
+                System.out.println(numCols);
+
+                for (i = 0; i < numCols; i++) {
+                    column = jTableColumnModel.getColumn(i);
+                    int pWidth = Math.round(columnWidthPercentage[i] * tableWidth);
+                    column.setPreferredWidth(pWidth);
                 }
 
                 // Close the input stream
@@ -98,6 +132,7 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
         private String name;
         private String artist;
         private String genre;
+        private ImageIcon albumCover;
 
         int cat = 0;    // For making sure to only get the first "category" element for "genre".
 
@@ -148,6 +183,33 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
 
                 // Reset category counter.
                 cat = 0;
+            }
+        }
+    }
+
+    private static class HeaderRenderer implements TableCellRenderer {
+        DefaultTableCellRenderer renderer;
+
+        HeaderRenderer(JTable table) {
+            renderer = (DefaultTableCellRenderer) table.getTableHeader().getDefaultRenderer();
+            renderer.setHorizontalAlignment(JLabel.LEFT);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+            return renderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+        }
+    }
+
+    class MyDefaultTableModel extends DefaultTableModel {
+        @Override
+        public Class<?> getColumnClass(int column) {
+            switch(column) {
+                case 0:
+                case 1: return String.class;
+                case 2: return String.class;
+                case 3: return ImageIcon.class;
+                default: return Object.class;
             }
         }
     }

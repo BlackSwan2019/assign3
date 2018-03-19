@@ -1,4 +1,4 @@
-/*
+/***********************************************************************
  CSCI 470 section 1
  TA:
  Partner 1      Ben Lane
@@ -10,7 +10,7 @@
 
  Purpose:       Obtain RSS feed of Apple iTunes music and parse its XML.
                 Then, display results in an application.
- *************************************************************************/
+ ************************************************************************/
 
 import java.awt.*;
 import javax.swing.*;
@@ -39,6 +39,7 @@ public class XMLDownloader extends JFrame {
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);    // Make execution stop upon clicking X.
         this.setSize(950, 600);
         this.setResizable(false);
+
 
         this.add(panel, BorderLayout.CENTER);
 
