@@ -207,13 +207,23 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
                     URL url = new URL(image);
                     BufferedImage bufferedImage = ImageIO.read(url);
 
+                    String path = System.getProperty("user.dir");
+
+                    path += "/images";
+
+                    File directory = new File(path);
+
+                    if (! directory.exists()){
+                        directory.mkdir();
+                    }
+
                     // A file named OutputImage%d.png will be created in local directory.
-                    ImageIO.write(bufferedImage, "png", new FileOutputStream("OutputImage" + imageCount + ".png"));
+                    ImageIO.write(bufferedImage, "png", new FileOutputStream("images/OutputImage" + imageCount + ".png"));
                 } catch(Exception e) {
                     e.printStackTrace();
                 }
 
-                String fileName = "OutputImage" + imageCount + ".png";
+                String fileName = "images/OutputImage" + imageCount + ".png";
 
                 BufferedImage img = null;       // was type BufferedImage.
 

@@ -57,8 +57,10 @@ class XMLDownloadPanel extends JPanel {
         albumTable.setRowHeight(55);
         albumTable.setRowSelectionAllowed(false);
 
+        // Make column labels left-justified.
         albumTable.getTableHeader().setDefaultRenderer(new HeaderRenderer(albumTable));
 
+        // Make rows colors alternate between blue and white. Also, get rid of selected cell border.
         albumTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
