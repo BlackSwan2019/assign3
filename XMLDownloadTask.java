@@ -240,21 +240,7 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
             }
         }
     }
-/*
-    private static class HeaderRenderer implements TableCellRenderer {
-        DefaultTableCellRenderer renderer;
 
-        HeaderRenderer(JTable table) {
-            renderer = (DefaultTableCellRenderer) table.getTableHeader().getDefaultRenderer();
-            renderer.setHorizontalAlignment(JLabel.LEFT);
-        }
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-            return renderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
-        }
-    }
-*/
     class MyDefaultTableModel extends DefaultTableModel {
         MyDefaultTableModel(Object[][] newArray, String[] newHeaders) {
             setDataVector(newArray, newHeaders);
