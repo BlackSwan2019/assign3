@@ -1,4 +1,4 @@
-/***********************************************************************
+/*
  CSCI 470 section 1
  TA:
  Partner 1      Ben Lane
@@ -6,11 +6,11 @@
  Partner 2:     Jinhong Yao
  zID:		    z178500
  Assignment:    3
- Date Due:	    2/14/2018
+ Date Due:	    4/4/2018
 
  Purpose:       Obtain RSS feed of Apple iTunes music and parse its XML.
                 Then, display results in an application.
- ************************************************************************/
+ */
 
 import java.awt.*;
 import javax.swing.*;
@@ -32,22 +32,24 @@ public class XMLDownloader extends JFrame {
         frame.createAndShowGUI();
     }
 
-    /*
+    /**
      * Create GUI elements.
     */
     private void createAndShowGUI() {
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);    // Make execution stop upon clicking X.
-        this.setSize(1000, 600);
-        this.setResizable(false);
+        this.setSize(1000, 600);        // Set JFrame size.
+        this.setResizable(false);                   // Make JFrame not resizable.
 
+        this.add(panel, BorderLayout.CENTER);       // Add main JPanel to JFrame.
 
-        this.add(panel, BorderLayout.CENTER);
+        this.createMenu();                          // Create and add menus to the JFrame.
 
-        this.createMenu();
-
-        this.setVisible(true);
+        this.setVisible(true);                      // Make JFrame visible.
     }
 
+    /**
+     * Create app menus.
+     */
     private void createMenu() {
         JMenuBar menuBar = new JMenuBar();
         this.setJMenuBar(menuBar);
@@ -115,20 +117,24 @@ public class XMLDownloader extends JFrame {
         JMenu explicit = new JMenu("Explicit");
         explicit.setToolTipText("Allow explicit albums");
         menuBar.add(explicit);
-
         ButtonGroup explicitGroup = new ButtonGroup();
 
+        // Explicit option for 'Yes'.
         JRadioButtonMenuItem yes = new JRadioButtonMenuItem("Yes");
         yes.addActionListener(new explicitListener());
         explicitGroup.add(yes);
         explicit.add(yes);
 
+        // Explicit option for 'No'.
         JRadioButtonMenuItem no = new JRadioButtonMenuItem("No");
         no.addActionListener(new explicitListener());
         explicitGroup.add(no);
         explicit.add(no);
     }
 
+    /*
+    * This inner class listens for menu selections in the Type menu.
+     */
     class typeListener implements ActionListener {
         public void actionPerformed(ActionEvent event) {
             String type;
@@ -149,6 +155,9 @@ public class XMLDownloader extends JFrame {
         }
     }
 
+    /*
+    * This inner class listens for menu selections in the Limit menu.
+     */
     class limitListener implements ActionListener {
         public void actionPerformed(ActionEvent event) {
             String limit;
@@ -172,6 +181,9 @@ public class XMLDownloader extends JFrame {
         }
     }
 
+    /*
+    * This inner class listens for menu selections in the Explicit menu.
+     */
     class explicitListener implements ActionListener {
         public void actionPerformed(ActionEvent event) {
             String explicit;

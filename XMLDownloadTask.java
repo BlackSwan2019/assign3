@@ -4,13 +4,10 @@ import java.net.*;
 import java.net.URL;
 import java.io.*;
 import java.util.ArrayList;
-
 import javax.xml.parsers.*;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
-
 import javax.swing.table.*;
-
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 
@@ -30,6 +27,11 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
         localPanel = panel;
     }
 
+    /**
+     * Fills an array list with destinations read from a text file.
+     *
+     * @return  ArrayList<Album>    list of albums collected from RSS feed
+     */
     @Override
     public ArrayList<Album> doInBackground() {
         HttpURLConnection connection = null;
@@ -76,11 +78,13 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
                 // Parse the XML string.
                 saxParser.parse(new InputSource(new ByteArrayInputStream(xmlDataString.getBytes("utf-8"))), new AlbumHandler());
 
+                // Create JTable structure.
                 String[] columnNames = {"Name", "Artist", "Genre", "Album Cover"};
                 Object[][] tableList = new Object[albumList.size()][4];
 
-                int i = 0;
+                int i = 0;      // row counter
 
+                // Populate JTable cells with album data.
                 for (Album a : albumList) {
                     tableList[i][0] = a.albumName;
                     tableList[i][1] = a.artistName;
@@ -90,20 +94,27 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
                     i++;
                 }
 
+                // Temporary table.
                 JTable tempTable = new JTable(new MyDefaultTableModel(tableList, columnNames));
 
+                // Apply temporary table (and its model) to table referencing the main table in XMLDownloadPanel.
                 localPanel.albumTable.setModel(tempTable.getModel());
 
+                // Column widths are each a percentage of the window width.
                 float[] columnWidthPercentage = {50.0f, 20.0f, 20.0f, 10.0f};
 
+                // Get width of main panel component.
                 int tableWidth = localPanel.albumTable.getWidth();
 
                 TableColumn column;
 
+                // Obtain column model of main panel.
                 TableColumnModel jTableColumnModel = localPanel.albumTable.getColumnModel();
 
+                // Get number of columns in the main panel.
                 int numCols = jTableColumnModel.getColumnCount();
 
+                // Resize each column according to the columnWidthPercentage array.
                 for (i = 0; i < numCols; i++) {
                     column = jTableColumnModel.getColumn(i);
                     int pWidth = Math.round(columnWidthPercentage[i] * tableWidth);
@@ -124,35 +135,58 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
         return albumList;
     }
 
+    /**
+     * Gets and converts image to ImageIcon.
+     *
+     * @param   sourceImage   single image read from the XML
+     *
+     * @return  BufferedImage   source image that is now a buffered image
+     */
     private BufferedImage getScaledImage(Image sourceImage) {
+        // The size of the image we want.
         BufferedImage resizedImage = new BufferedImage(50, 50, BufferedImage.TYPE_INT_ARGB);       // image container
 
+        // Create Graphics2D object from resizedImage.
         Graphics2D g2 = resizedImage.createGraphics();
 
+        // Set key properties of image.
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
+        // Draw Graphics@D object using passed-in image.
         g2.drawImage(sourceImage, 0, 0, 50, 50, null);
 
+        // Delete Graphics2D object.
         g2.dispose();
 
         return resizedImage;
     }
 
+    /*
+    * This class handles Album data as the SAX Parser parses the Apple XML.
+     */
     private class AlbumHandler extends DefaultHandler {
-        private boolean bName = false;
-        private boolean bArtist = false;
-        private boolean bImage = false;
+        private boolean bName = false;      // Status if XML tag is found. Default false.
+        private boolean bArtist = false;    // Status if XML tag is found. Default false.
+        private boolean bImage = false;     // Status if XML tag is found. Default false.
 
-        private String name;
-        private String artist;
-        private String genre;
-        private String image;
+        private String name;        // name of album
+        private String artist;      // nName of artist
+        private String genre;       // music genre
+        private String image;       // album image source URL
 
-        ImageIcon albumCover;
+        ImageIcon albumCover;       // image of album
 
         int cat = 0;            // For making sure to only get the first "category" element for "genre".
         int imageCount = 0;     // Keeps track of output images.
 
+        /**
+         * Fills an array list with destinations read from a text file.
+         *
+         * @param   uri      URL of where the XML is being read from
+         * @param   localName      name of tag within the XML document.
+         * @param   qName      same as localName but with "html:" prepended
+         * @param   attributes   a tag's attribute (if it has one)
+         */
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) {
             if (qName.equalsIgnoreCase("im:name")) {
@@ -204,15 +238,20 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
 
             if (qName.equalsIgnoreCase("entry")) {
                 try {
+                    // Make URL string into a proper URL object.
                     URL url = new URL(image);
                     BufferedImage bufferedImage = ImageIO.read(url);
 
+                    // Obtain user's working directory.
                     String path = System.getProperty("user.dir");
 
+                    // Append images to end of path.
                     path += "/images";
 
+                    // Make path into file.
                     File directory = new File(path);
 
+                    // If path (folder) doesn't exist, make it. This folder will hold images.
                     if (! directory.exists()){
                         directory.mkdir();
                     }
@@ -223,10 +262,12 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
                     e.printStackTrace();
                 }
 
+                // This string will be what images are written into the folder as.
                 String fileName = "images/OutputImage" + imageCount + ".png";
 
-                BufferedImage img = null;       // was type BufferedImage.
+                BufferedImage img = null;
 
+                // Read an album image from folder.
                 try {
                     img = ImageIO.read(new File(fileName));
                 } catch (IOException e) {
@@ -235,8 +276,10 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
 
                 imageCount++;
 
+                // Scale image.
                 BufferedImage scaledImage = getScaledImage(img);
 
+                // Put scaled image into album field 'albumCover' as an ImageIcon.
                 albumCover = new ImageIcon(scaledImage);
 
                 // Compile album name, artist, and genre into an Album object.
@@ -251,6 +294,9 @@ public class XMLDownloadTask extends SwingWorker<ArrayList<Album>, Album> {
         }
     }
 
+    /*
+    * This class is a custom table model for allowing images of ImageIcon type to be included.
+     */
     class MyDefaultTableModel extends DefaultTableModel {
         MyDefaultTableModel(Object[][] newArray, String[] newHeaders) {
             setDataVector(newArray, newHeaders);

@@ -7,6 +7,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.table.DefaultTableCellRenderer;
 
+/*
+* This class is the primary JPanel of the app.
+*/
 class XMLDownloadPanel extends JPanel {
     // task that will download and parse XML and display it in the JTextArea
     private XMLDownloadTask task;
@@ -17,9 +20,11 @@ class XMLDownloadPanel extends JPanel {
     private JPanel buttonPanel = new JPanel();
     private JScrollPane albumScroll;
 
+    // Create table to display album data.
     JTable albumTable = new JTable() {
         private static final long serialVersionUID = 1L;
 
+        // Make cells uneditable.
         public boolean isCellEditable(int row, int column) {
             return false;
         }
@@ -37,14 +42,16 @@ class XMLDownloadPanel extends JPanel {
     private JLabel timeOutput = new JLabel();
 
     XMLDownloadPanel() {
+        // Set layout of JFrame.
         this.setLayout(new BorderLayout());
 
+        // Add button panel/button to the JFrame.
         this.add(buttonPanel, BorderLayout.PAGE_START);
         getAlbums.addActionListener(new albumButtonListener());
-        //getAlbums.setBackground(new Color(255, 255, 255));
-
         buttonPanel.add(getAlbums, BorderLayout.CENTER);
         getAlbums.setPreferredSize(getAlbums.getPreferredSize());
+
+        // Add timer to panel.
         buttonPanel.add(new JLabel("Elapsed Time: "));
         buttonPanel.add(timeOutput);
         timeOutput.setText(Integer.toString(minutes) + ":" + Integer.toString(ones) + Integer.toString(tens));
@@ -77,37 +84,49 @@ class XMLDownloadPanel extends JPanel {
             }
         });
 
+        // Embed the album table in the scroll pane.
         albumScroll = new JScrollPane(albumTable);
 
-        //albumScroll = new JScrollPane(albumList);
-
+        // Add the scroll pane to the JFrame.
         this.add(albumScroll, BorderLayout.CENTER);
     }
 
+    // Set type of album.
     void setType(String newType) {
         type = newType;
     }
 
+    // Set results limit.
     void setLimit(String newLimit) {
         limit = newLimit;
     }
 
+    // Set whether explicit albums are returned.
     void setExplicit(String newExplicit) {
         explicit = newExplicit;
     }
 
+    /*
+    * This inner class listens for when the "Get Albums" button is pressed.
+    */
     class albumButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent event) {
             // Reset table to blank.
             albumTable.setModel(new DefaultTableModel());
 
+            // Begin downloading of album data.
             download();
         }
     }
 
+    /**
+     * Fills an array list with destinations read from a text file.
+     */
     private void download() {
+        // Set name default to blank.
         String name = "";
 
+        // Make sure all three options have values before proceeding.
         if (!type.equals("") && !limit.equals("") && !explicit.equals("")) {
             // Build URL string.
             name = "https://rss.itunes.apple.com/api/v1/us/itunes-music/" + type + "/all/" + limit + "/" + explicit + ".atom";
@@ -115,10 +134,13 @@ class XMLDownloadPanel extends JPanel {
             albumList.setText("Missing menu selection(s).");
         }
 
+        // Download and process XML data and make a new task out of it.
         task = new XMLDownloadTask(name, this);
 
+        // Timer for keepinng track of duration of processing.
         Timer timer = new Timer();
 
+        // This listener listens for state changes of the task, allowing timer to keep track of processing of album list.
         task.addPropertyChangeListener(event -> {
             switch ((StateValue) event.getNewValue()) {
                 case STARTED:
@@ -127,6 +149,8 @@ class XMLDownloadPanel extends JPanel {
                     minutes = 0;
                     ones = 0;
                     tens = 0;
+
+                    // Increment counter by 1 second per second, carrying any digits as needed.
                     timer.scheduleAtFixedRate(new TimerTask() {
                         @Override
                         public void run() {
@@ -152,9 +176,13 @@ class XMLDownloadPanel extends JPanel {
             }
         });
 
+        // Actually execute the task (XML downloading and parsing) now.
         task.execute();
     }
 
+    /*
+    * This inner class sets the header column labels to left-justified.
+    */
     private static class HeaderRenderer implements TableCellRenderer {
         DefaultTableCellRenderer renderer;
 
